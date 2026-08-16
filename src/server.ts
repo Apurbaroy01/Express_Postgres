@@ -1,5 +1,5 @@
 import express, { type Application, type Request, type Response } from "express";
-import {Pool} from "pg";
+import { Pool } from "pg";
 const app: Application = express()
 const port = 5000
 
@@ -7,7 +7,7 @@ app.use(express.json());
 
 
 const pool = new Pool({
-    connectionString:"postgresql://neondb_owner:npg_P7MSOnVsU2Tv@ep-withered-tree-ay8poq77-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+    connectionString: "postgresql://neondb_owner:npg_P7MSOnVsU2Tv@ep-withered-tree-ay8poq77-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 })
 
 const initDB = async () => {
@@ -38,9 +38,23 @@ app.get('/', (req: Request, res: Response) => {
     res.status(200).json({ message: 'Hello World!' })
 });
 
-app.post("/", async(req: Request, res: Response) => {
-    console.log(req.body);
-    res.status(200).json({ message: req.body });
+// create user
+app.post("/", async (req: Request, res: Response) => {
+    const { name, email, password, age } = req.body;
+
+    try {
+        const result = await pool.query(`
+        INSERT INTO users (name, email, password, age)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+        `, [name, email, password, age]
+        );
+
+        res.status(200).json({ message: 'User created successfully', user: result.rows[0] });
+    } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).json({ message: 'Error creating user' });
+    }
 });
 
 app.listen(port, () => {
