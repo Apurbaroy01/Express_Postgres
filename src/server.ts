@@ -1,5 +1,6 @@
 import express, { type Application, type Request, type Response } from "express";
 import { Pool } from "pg";
+import "dotenv/config";
 const app: Application = express()
 const port = 5000
 
@@ -7,13 +8,12 @@ app.use(express.json());
 
 
 const pool = new Pool({
-    connectionString: "postgresql://neondb_owner:npg_P7MSOnVsU2Tv@ep-withered-tree-ay8poq77-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+    connectionString: process.env.DATABASE_URL,
 })
 
 const initDB = async () => {
-    const client = await pool.connect();
     try {
-        await client.query(`
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(20) NOT NULL,
@@ -27,16 +27,13 @@ const initDB = async () => {
             )
         `);
         console.log('Table created successfully');
-    } catch (err) {
+    } catch (err: any) {
         console.error('Error creating table:', err);
     }
 };
 
 initDB().catch(console.error);
 
-app.get('/', (req: Request, res: Response) => {
-    res.status(200).json({ message: 'Hello World!' })
-});
 
 // create user
 app.post("/", async (req: Request, res: Response) => {
@@ -51,7 +48,7 @@ app.post("/", async (req: Request, res: Response) => {
         );
 
         res.status(200).json({ message: 'User created successfully', user: result.rows[0] });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating user:', error);
         res.status(500).json({ message: 'Error creating user' });
     }
