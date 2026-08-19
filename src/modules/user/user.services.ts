@@ -1,16 +1,25 @@
-import type { Request, Response } from "express";
 import { pool } from "../../db";
 
-const getAllUsers = async (req: Request, res: Response) => {
-    try {
-        const result = await pool.query(`
-            SELECT * FROM users
-            `);
-        res.status(200).json({ success: true, message: 'Users fetched successfully', users: result.rows });
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        res.status(500).json({ message: 'Error fetching users' });
-    }
+const createUserIntoDB = async (paload: any) => {
+    const { name, email, password, age } = paload;
+    const result = await pool.query(`
+        INSERT INTO users (name, email, password, age)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+        `, [name, email, password, age]
+    );
+    return result;
 };
 
-export { getAllUsers };
+const getAllUsers = async () => {
+    const result = await pool.query(`
+            SELECT * FROM users
+            `);
+
+    return result;
+};
+
+export const UserService = {
+    createUserIntoDB,
+    getAllUsers
+}

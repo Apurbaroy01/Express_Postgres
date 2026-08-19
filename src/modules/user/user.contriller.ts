@@ -1,16 +1,12 @@
 import type { Request, Response } from "express";
-import { pool } from "../../db";
+import { UserService } from "./user.services";
 
 const createUser = async (req: Request, res: Response) => {
-    const { name, email, password, age } = req.body;
-
     try {
-        const result = await pool.query(`
-        INSERT INTO users (name, email, password, age)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *
-        `, [name, email, password, age]
-        );
+        const result = await UserService.createUserIntoDB(req.body);
+        if (!result.rows.length) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
 
         res.status(200).json({ message: 'User created successfully', user: result.rows[0] });
     } catch (error: any) {
@@ -19,4 +15,14 @@ const createUser = async (req: Request, res: Response) => {
     }
 };
 
-export { createUser };
+const getAllUsers = async (req: Request, res: Response) => {
+    try {
+        const result = await UserService.getAllUsers();
+        res.status(200).json({ success: true, message: 'Users fetched successfully', users: result.rows });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Error fetching users' });
+    }
+};
+
+export { createUser, getAllUsers };

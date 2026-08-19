@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { createUser } from "./user.contriller";
-import { getAllUsers } from "./user.services";
+import { createUser, getAllUsers } from "./user.contriller";
+
 
 const router = Router();
 
