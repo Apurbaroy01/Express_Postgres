@@ -2,7 +2,7 @@ import { pool } from "../../db";
 
 const createProfileIntoDB = async (paload: any) => {
     const { user_id, bio, address, phone, gender } = paload;
-    console.log(user_id, bio, address, phone, gender);
+
 
     const user = await pool.query(`
         SELECT * FROM users
