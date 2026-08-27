@@ -3,15 +3,15 @@ import type { IUser } from "./user.interface";
 import bcrypt from "bcryptjs";
 
 const createUserIntoDB = async (paload: IUser) => {
-    const { name, email, password, age } = paload;
+    const { name, email, password, age, role } = paload;
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(`
-        INSERT INTO users (name, email, password, age)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO users (name, email, password, age, role)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING *
-        `, [name, email, hashedPassword, age]
+        `, [name, email, hashedPassword, age, role]
     );
     delete result.rows[0].password
     return result;
